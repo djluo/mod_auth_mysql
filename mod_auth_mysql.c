@@ -772,7 +772,8 @@ module mysql_auth_module;
  */
 static char * bin2hex (POOL *pool, const char * bin, short len) {
   int i = 0;
-  static char hexchars [] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+  /* static char hexchars [] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}; */
+  static char hexchars [] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
   char * buffer = PCALLOC(pool, len * 2 + 1);
   for (i = 0; i < len; i++) {
     buffer[i*2] = hexchars[bin[i] >> 4 & 0x0f];
