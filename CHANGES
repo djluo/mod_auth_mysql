@@ -1,0 +1,117 @@
+ mod_auth_mysql: authentication
+
+ Rob McCool & Brian Behlendorf.
+
+ Adapted to Shambhala by rst.
+
+ converted to use MySQL by Vivek Khera <khera@kciLink.com>
+
+ Previously maintained by Sam Brauer <sbrauer@users.sourceforge.net> (Thanks, Sam!)
+ Now maintained by Jerry Stuckle <jstuckle@users.sourceforge.net)
+ 
+2002-08-09: ported to Apache-2.x
+
+2002-09-06: merged Apache1 and Apache2 code together with #ifdef's
+
+2002-09-08: merged in some contributed patches:
+ - added AuthMySQLUserCondition and AuthMySQLGroupCondition,
+ based on a patch from Lukas Gradl <l.gradl@business-solutions.at>
+ - added AuthMySQLScrambledPasswords based on patch from 
+ Chris Hamilton <chris@turlyming.com>
+
+2002-09-12: released on sourceforge.net
+
+2002-09-16: released on sourceforge.net (after change to README)
+
+2003-03-16:
+ - added Artur Kedzierski's mysql 4 change to
+ use mysql_real_connect().
+ - added Martin Willner's patch for MD5 support (enable by defining
+ MD5_ENABLED).
+ - moved usage notes to README file and updated a bit.
+
+2003-03-19: added Iain Patterson's patch to call mysql_init() before mysql_real_connect().
+
+2003-05-10: removed the old MD5 stuff that depended on openssl and replaced with a call to apache's ap_md5() function.
+
+2004-08-27: 
+ - added Ariel Arjona's code to resolve compile problems due to missing/incorrect headers
+ - added code based on Jorge Jimenez's patch to support non-standard sockets and ports
+ - released updated copy as version 2.0.0 (new version numbering system to match other projects)
+
+2004-09-08: (Version 2.5.0)
+ merged in code based on contribuited patches:
+ - added AuthMySQLPort and AuthMySQLSocket options based on patches by Douglas Maske and Jorge Jimenez
+ - added missing #include statements based on patch by Ariel Arjona
+
+2004-09-21: (Version 2.6.0)
+ - fixed error when compiling for Apache 1.x.
+ - rewrote some of the code to get rid of many of the #ifdef statements
+ - added code based on Andrew Gwozdziewycz's patch to enable AuthMySQLSaltField
+ - added code based on Hatamoto's patch to enable AuthMySQLEnable   
+ - added new parameter AuthMySQLPwEncryption to set encryption type
+ - depricated the following parameters:
+ 
+   AuthMySQLCryptedPasswords
+   AuthMySQLScrambledPasswords
+   AuthMySQLMD5Passwords
+
+ - added compile time default values for the following configuration paramters:
+
+  Configuration Parameter		Option
+  -----------------------		------
+  AuthMySQLHost			HOST
+  AuthMySQLPort			PORT
+  AuthMySQLSocket			SOCKET
+  AuthMySQLUser			USER
+  AuthMySQLPassword			PASSWORD
+  AuthMySQLDB				DB
+  AuthMySQLPwTable			PWTABLE	
+  AuthMySQlNameField			NAMEFIELD
+  AuthMySQLPasswordField		PASSWORDFIELD
+  AuthMySQLPwEncryption		ENCRYPTION
+  AuthMySQLSaltField			SALT	
+  AuthMySQLKeepAlive			KEEPALIVE
+  AuthMySQLAuthoritative		AUTHORITATIVE	
+  AuthMySQLNoPassword			NOPASSWORD
+  AuthMySQLEnable			ENABLE
+
+ - Removed requirement to define APACHE1 on command line for Apache 1.x
+   (now the default). 
+   
+2004-10-04: (Version 2.6.1)
+ - Changed code to return immediately when module is disabled
+
+2004-10-20: (Version 2.7.0)
+ - Changed authorization code to process "require user" and "require group" correctly
+
+2004-12-07: (Version 2.8.0)
+ - Separated documentiation into multiple files
+ - Updated all documentation
+ - Added support for AES_ENCRYPT encryption
+ - Added support for SHA1 encryption based on code by Matthew Sullivan 
+
+2004-12-14 (Version 2.8.1)
+ - Changed code to require a compile time parameter to include AES encryption
+ - Fixed a minor bug in handling of the AuthMySQLSaltField for AES encryption
+
+2005-02-21 (Version 2.9.0)
+ - Restructured the password encryption code into functions based on encyption scheme
+ - Fixed bug caused by new scrambled password algorithm in MySQL 4.1
+ - Added formatting parameters to the AuthMySQLUserCondition and AuthMySQLGroupCondition
+   to allow comparisons against information from the request (thanks to Guido Smit)
+ - Added new parameter AuthMySQLCharacterSet (and compile time parameter CHARACTERSET)
+   to override the default character set used for MySQL connections (thanks to Alex Stanciu)
+ - Fixed a bug in the password hashing mechanism.  This only affects MySQL 4.1 and later
+   using PASSWORD encryption
+
+2005-6-22 (version 3.0.0)
+ - Fixed a bug when using AES encryption
+ - Added new parameter AuthMySQLGroupUserNameField to specify the user name field in the group table
+ - Changed the default include file for the crypt() function to the newer unistd.h file (the old
+   crypt.h file can still be included - see the instructions in the BUILD file)
+ - Added code to allow comparing to stored cookies 
+ - Performance improvement. Module will no longer reselect the database if the same one is being
+   used for multiple requests.  Note that if a second copy of the module is initialized by Apache,
+   we will still need to connect and select the database.
+ - Removed the AuthMySQLKeepAlive parameter, which doesn't work and causes problems.

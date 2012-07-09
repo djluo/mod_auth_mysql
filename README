@@ -1,0 +1,9 @@
+mod_auth_mysql is an Apache module to authenticate users and authorize access
+through a MySQL database.  It is flexible and support several encryption
+methods.  The module will work on both Apache 1.x and Apache 2.x.
+
+Please see the BUILD file for instructions on how to build mod_auth_mysql.
+
+See the file INSTALL for instructions on how to install the module
+
+See the file CONFIGURE for options in configuring the module on Apache.
