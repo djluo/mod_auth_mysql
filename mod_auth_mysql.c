@@ -288,6 +288,7 @@ static short pw_crypted(POOL * pool, const char * real_pw, const char * sent_pw,
 static short pw_aes(POOL * pool, const char * real_pw, const char * sent_pw, const char * salt);
 #endif
 static short pw_sha1(POOL * pool, const char * real_pw, const char * sent_pw, const char * salt);
+static short pw_redmine(POOL * pool, const char * real_pw, const char * sent_pw, const char * salt);
 static short pw_plain(POOL * pool, const char * real_pw, const char * sent_pw, const char * salt);
 
 static char * format_remote_host(request_rec * r, char ** parm);
@@ -318,7 +319,8 @@ static encryption encryptions[] = {{"crypt", SALT_OPTIONAL, pw_crypted},
 #if _AES
 					   {"aes", SALT_REQUIRED, pw_aes},
 #endif
-					   {"sha1", NO_SALT, pw_sha1}};
+					   {"sha1", NO_SALT, pw_sha1},
+					   {"redmine", SALT_REQUIRED, pw_redmine}};
 typedef struct {		/* User formatting patterns */
   char pattern;			/* Pattern to match */
   char * (*func)(request_rec * r, char ** parm);
@@ -855,6 +857,34 @@ static short pw_sha1(POOL * pool, const char * real_pw, const char * sent_pw, co
 #endif
   scrambled_sent_pw[enc_len] = '\0';
   return  strcasecmp(bin2hex(pool, scrambled_sent_pw, enc_len), real_pw) == 0;
+}
+/*
+ * Support redmine
+ * Convert char to sha1
+ */
+static char * chr2sha1(POOL * pool, const char * chr) {
+
+  char *scrambled_chr, *buffer=PCALLOC(pool, 128);
+  short enc_len = 0;
+
+  apr_sha1_base64(chr, strlen(chr), buffer);
+  buffer += 5;   /* go past {SHA1} eyecatcher */
+  scrambled_chr = PCALLOC(pool, apr_base64_decode_len(buffer) + 1);
+  enc_len = apr_base64_decode(scrambled_chr, buffer);
+  scrambled_chr[enc_len] = '\0';
+
+  char * hash=bin2hex(pool, scrambled_chr, enc_len);
+  //syslog(LOG_INFO, "chr:%s, sha1:%s",chr,hash);
+  return hash;
+}
+/* checks SHA1 passwords for redmine */
+static short pw_redmine(POOL * pool, const char * real_pw, const char * sent_pw, const char * salt) {
+
+  char * sent_sha1 = chr2sha1(pool, sent_pw);
+  char * salt_sha1 = chr2sha1(pool, strcat((void *)salt, (void *)sent_sha1));
+  //syslog(LOG_INFO, "sent_pw:%s, sent_sha1:%s",sent_pw,sent_sha1);
+  //syslog(LOG_INFO, "salt:%s, salt_sha1:%s",salt, salt_sha1);
+  return  strcasecmp(salt_sha1, real_pw) == 0;
 }
 
 /* checks plain text passwords */
